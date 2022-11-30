@@ -37,10 +37,6 @@ def preprocess(df_in, read_pickle_flag=True):
     
     return processed_df
 
-def getVaderSentiment(df_in, col_name):
-    df_in["vader_score"] = df_in[col_name].apply(sent_fun)
-    return df_in
-
 rotten_tomatoes_dataset_path = os.getcwd() + '/raw_datasets/rottentomatoes-400k.csv'
 top_critics_dataset_path = os.getcwd() + '/raw_datasets/rt_top_critics.csv'
 
@@ -49,7 +45,7 @@ top_critics = read_csv(top_critics_dataset_path)
 
 # Read pickle to save processing time, make sure to change flags after creating pickle
 # cannot save pickles to git because the files are too large 
-preprocessed_df = preprocess(reviews_df, True)
+preprocessed_df = preprocess(reviews_df, False)
 
 
 
