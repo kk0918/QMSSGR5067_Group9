@@ -28,6 +28,25 @@ The sentiment analysis could be cut and compared on different variables
   - I.e. RT uses a binary system, while Metacritic uses a weighted average, but both take in many of the same reviews to produce scores
 Movie recommendation model based on the extracted sentiment similarity
 
+## TODOS for team: 
 
-## TODOS for team: (thinking we could put items/tasks here for people to do whenever they get the opportunity)
-- 
+Part 1: Analyzing RT aggregate sentiment scores vs binary provided RT score 
+- Preprocess the review text 
+- Calculate sentiments for preprocessed reviews 
+  - Vader? another method? multiple? 
+- Get actual RT critic score from another dataset + merge with current
+- Create visualizations
+    - Word clouds for different types of movies/genres
+    - Examples of sentences/words with large difference between our sentiment score vs RT score 
+    - Examples of sentences/words with small difference between our sentiment score vs RT score
+
+Part 2: Adding in box office mojo data + additional trends
+- Gather box office mojo data (manually, scrape, or another kaggle dataset)
+- Merge datasets 
+- Create visualizations
+  - Compare score vs box office amount trends
+  - Word clouds
+- Predictions 
+  - What kind of words in reviews would lead to a high box office? 
+
+Part 3: Presentation work/setup
