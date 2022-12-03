@@ -30,7 +30,6 @@ def parallelize_write_sentiment_pickles(data, col_in, col_out, out_path, func, n
         data_split[i][col_out] = pool.map(func, data_split[i][col_in])
         pool.close()
         pool.join()
-        #out_path = os.getcwd() + "/pickles/"
         write_pickle(data_split[i], out_path, f'sentiment_{i}')
         end = time.time()
         print("-------------------------------------------")
@@ -42,11 +41,11 @@ def parallelize_write_sentiment_pickles(data, col_in, col_out, out_path, func, n
     Merge the resultant sentiment pickles. They were split up into 8 pickles 
     for smaller pickle sizes
 """
-def merge_sentiment_dfs(num_of_sentiment_dfs, file_path):
+def merge_pickle_dfs(file_prefix, num_of_sentiment_dfs, file_path):
     import pandas as pd 
     sentiments = []
     for i in range(num_of_sentiment_dfs):
-        sentiments.append(read_pickle(file_path, f'sentiment_{i}'))
+        sentiments.append(read_pickle(file_path, f'{file_prefix}{i}'))
     result = pd.concat(sentiments)
     return result
 
