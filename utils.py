@@ -53,6 +53,35 @@ def merge_pickle_dfs(file_prefix, num_of_sentiment_dfs, file_path):
     ***************** Preprocessing Helpers *****************
 """
 
+def preprocess(df_in, out_path, num_split):    
+    import numpy as np
+
+    processed_df = df_in.copy()
+    # lowercase headers
+    processed_df.columns = [header.lower() for header in processed_df.columns]
+    
+    # Remove words between quotes
+    processed_df["cleaned_review"] = processed_df.review.apply(remove_words_between_quotes)
+    # Remove title 
+    processed_df["cleaned_review"] = processed_df.apply(lambda x: remove_title(x.cleaned_review, x.movie), axis=1)
+    # Clean text
+    processed_df["cleaned_review"] = processed_df.cleaned_review.apply(clean_text)
+    # Remove stopwords
+    processed_df["cleaned_review"] = processed_df.cleaned_review.apply(rem_sw)
+    
+    # Drop columns not needed for analysis
+    processed_df = processed_df.drop('date', axis=1)
+    processed_df = processed_df.drop('publish', axis=1)
+
+    # Split data into chunks
+    data_split = np.array_split(processed_df, num_split)
+
+    # Write pickles
+    for i in range(num_split):
+        write_pickle(data_split[i], out_path, f'preprocessed_{i}')
+    
+    return processed_df
+
 
 """
     Remove title of movie in review itself
