@@ -9,12 +9,6 @@ import os
 from utils import *
 import pandas as pd 
 
-# Custom helper functions not available from utils
-def read_csv(file_path):
-    df = pd.read_table(file_path, sep=",")
-    return df
-
-# Add preprocessing steps here
 def preprocess(df_in, read_pickle_flag=True):
     out_path = os.getcwd() + "/pickles/"
     
@@ -26,9 +20,19 @@ def preprocess(df_in, read_pickle_flag=True):
     processed_df = df_in.copy()
     # lowercase headers
     processed_df.columns = [header.lower() for header in processed_df.columns]
-    # clean text and remove stopwords
-    processed_df["cleaned_review"] = processed_df.review.apply(clean_text).apply(rem_sw)
-
+    
+    # Remove words between quotes
+    processed_df["cleaned_review"] = processed_df.review.apply(remove_words_between_quotes)
+    # Remove title 
+    processed_df["cleaned_review"] = processed_df.apply(lambda x: remove_title(x.cleaned_review, x.movie), axis=1)
+    # Clean text
+    processed_df["cleaned_review"] = processed_df.cleaned_review.apply(clean_text)
+    # Remove stopwords
+    processed_df["cleaned_review"] = processed_df.cleaned_review.apply(rem_sw)
+    
+    # Drop columns not needed for analysis
+    processed_df = processed_df.drop('date', axis=1)
+    processed_df = processed_df.drop('publish', axis=1)
     # Create a new pickle for when we add additional preprocessing steps
     # and if pickles folder doesn't exist, make one
     if not os.path.exists(out_path):

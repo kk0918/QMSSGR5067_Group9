@@ -5,6 +5,56 @@ Created on Mon Oct  3 20:31:11 2022
 @author: pathouli
 """
 
+# Custom helper functions not available from utils
+def read_csv(file_path):
+    import pandas as pd
+    df = pd.read_table(file_path, sep=",")
+    return df
+
+"""
+    ***************** Preprocessing Helpers *****************
+"""
+
+
+"""
+    Remove title of movie in review itself
+    Example:
+        Movie name: Hearts and Bones
+        Before:
+            Review: Hearts and Bones' dull visuals and undernourished....
+        After:
+            Review: dull visuals and undernourished....
+"""
+def remove_title(str_in, title):
+    import re
+    str_in_lowercase = str_in.lower()
+    title_lower = title.lower()
+    sent_clean = re.sub(r"\b{}\b".format(title_lower), "", str_in_lowercase)
+    return sent_clean
+
+"""
+    Remove words in between quotes
+    Words in between quotes are almost always a reference to the shortened
+    version of the title or a name.
+    Example: 
+        Movie name: THE LAST BLACK MAN IN SAN FRANCISCO
+        Before:
+            Review: "Last" doesn't rely much on conventional narrative..
+        After:
+            Review: doesn't rely much on conventional narrative..
+"""
+def remove_words_between_quotes(str_in):
+    import re
+    # This removes the first and last quotes if the entire review is in quotes
+    sent_stripped_first_and_last_quotes = re.sub(r'^"|"$', '', str_in)
+    sent_clean = re.sub('".*?"', "", sent_stripped_first_and_last_quotes)
+    return sent_clean
+
+
+"""
+    ***************** Utils file from lecture *****************
+"""
+
 def count_fun(var_in):
     tmp = var_in.split()
     return len(tmp)
@@ -15,7 +65,7 @@ def count_fun_unique(var_in):
 
 def clean_text(str_in):
     import re
-    sent_a_clean = re.sub("[^A-Za-z']+", " ", str_in.lower()) 
+    sent_a_clean = re.sub("[^A-Za-z]+", " ", str_in.lower()) 
     return sent_a_clean
 
 def open_file(file_in):

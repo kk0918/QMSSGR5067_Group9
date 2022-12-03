@@ -30,7 +30,7 @@ Movie recommendation model based on the extracted sentiment similarity
 
 ## TODOS for team: 
 
-Part 1: Analyzing RT aggregate sentiment scores vs binary provided RT score 
+Part 1: Analyzing RT aggregate sentiment scores vs accumulated binary(positive/negative) RT score 
 - Preprocess the review text 
 - Calculate sentiments for preprocessed reviews 
   - Vader? another method? multiple? 
