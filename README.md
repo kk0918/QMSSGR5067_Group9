@@ -32,6 +32,11 @@ Movie recommendation model based on the extracted sentiment similarity
 
 Part 1: Analyzing RT aggregate sentiment scores vs accumulated binary(positive/negative) RT score 
 - Preprocess the review text 
+  - Remove words between quotes
+  - Remove title 
+  - Clean text
+  - Remove stopwords 
+  - ADD MORE IF NECESSARY
 - Calculate sentiments for preprocessed reviews 
   - Vader? another method? multiple? 
 - Get actual RT critic score from another dataset + merge with current
