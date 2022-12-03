@@ -8,10 +8,10 @@ Created on Tue Nov 29 19:07:08 2022
 import os
 from utils import *
 import pandas as pd 
+import numpy as np
+import time
 
 def preprocess(df_in, read_pickle_flag=True):
-    out_path = os.getcwd() + "/pickles/"
-    
     # if read pickle flag enabled and directory for pickles exists
     if(read_pickle_flag and os.path.exists(out_path)):
         reviews_df = read_pickle(out_path, "preprocessed_reviews")
@@ -41,16 +41,25 @@ def preprocess(df_in, read_pickle_flag=True):
     
     return processed_df
 
-rotten_tomatoes_dataset_path = os.getcwd() + '/raw_datasets/rottentomatoes-400k.csv'
-top_critics_dataset_path = os.getcwd() + '/raw_datasets/rt_top_critics.csv'
-
-reviews_df = read_csv(rotten_tomatoes_dataset_path)
-top_critics = read_csv(top_critics_dataset_path)
-
-# Read pickle to save processing time, make sure to change flags after creating pickle
-# cannot save pickles to git because the files are too large 
-preprocessed_df = preprocess(reviews_df, False)
-
+if __name__ == '__main__':
+    rotten_tomatoes_dataset_path = os.getcwd() + '/raw_datasets/rottentomatoes-400k.csv'
+    top_critics_dataset_path = os.getcwd() + '/raw_datasets/rt_top_critics.csv'
+    out_path = os.getcwd() + "/pickles/"
+    
+    reviews_df = read_csv(rotten_tomatoes_dataset_path)
+    top_critics = read_csv(top_critics_dataset_path)
+    
+    # Set variables here to define whether we want to read or write new pickles
+    WRITE_NEW_PREPROCESSED_PICKLE = True
+    WRITE_NEW_SENTIMENT_PICKLES = False
+    
+    # Read pickle to save processing time, make sure to change flags after creating pickle
+    # cannot save pickles to git because the files are too large 
+    preprocessed_df = preprocess(reviews_df, WRITE_NEW_PREPROCESSED_PICKLE)
+    
+    if(WRITE_NEW_SENTIMENT_PICKLES):
+        sentiment_df= parallelize_write_sentiment_pickles(preprocessed_df, "cleaned_review", "vader_sentiment", out_path, sent_fun)
+    sentiment_df = merge_sentiment_dfs(8, out_path)
 
 
 

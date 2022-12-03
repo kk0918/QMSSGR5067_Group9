@@ -11,6 +11,45 @@ def read_csv(file_path):
     df = pd.read_table(file_path, sep=",")
     return df
 
+
+
+"""
+   Write out sentiment pickles, defined by num_of_processes which I default set to 8
+   results in /pickles folder with names such as sentiment_0.pk
+"""
+def parallelize_write_sentiment_pickles(data, col_in, col_out, out_path, func, num_of_processes=8):
+    from multiprocessing import Pool
+    import numpy as np
+    import time
+    data_split = np.array_split(data, num_of_processes)
+
+    for i in range(num_of_processes):
+        print(f'Running on data_split {i}')
+        start = time.time()
+        pool = Pool(num_of_processes)
+        data_split[i][col_out] = pool.map(func, data_split[i][col_in])
+        pool.close()
+        pool.join()
+        #out_path = os.getcwd() + "/pickles/"
+        write_pickle(data_split[i], out_path, f'sentiment_{i}')
+        end = time.time()
+        print("-------------------------------------------")
+        print("PPID %s Completed in %s" % (os.getpid(), round(end-start, 2)))
+    return
+
+
+"""
+    Merge the resultant sentiment pickles. They were split up into 8 pickles 
+    for smaller pickle sizes
+"""
+def merge_sentiment_dfs(num_of_sentiment_dfs, file_path):
+    import pandas as pd 
+    sentiments = []
+    for i in range(num_of_sentiment_dfs):
+        sentiments.append(read_pickle(file_path, f'sentiment_{i}'))
+    result = pd.concat(sentiments)
+    return result
+
 """
     ***************** Preprocessing Helpers *****************
 """
