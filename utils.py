@@ -2,7 +2,7 @@
 """
 Created on Mon Oct  3 20:31:11 2022
 
-@author: pathouli
+@author: Group 7
 """
 
 # Custom helper functions not available from utils
