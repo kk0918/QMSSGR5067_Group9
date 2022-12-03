@@ -12,7 +12,6 @@ def read_csv(file_path):
     return df
 
 
-
 """
    Write out sentiment pickles, defined by num_of_processes which I default set to 8
    results in /pickles folder with names such as sentiment_0.pk
@@ -21,10 +20,11 @@ def parallelize_write_sentiment_pickles(data, col_in, col_out, out_path, func, n
     from multiprocessing import Pool
     import numpy as np
     import time
+    import os
     data_split = np.array_split(data, num_of_processes)
 
     for i in range(num_of_processes):
-        print(f'Running on data_split {i}')
+        print(f'Running sentiment on data_split {i}')
         start = time.time()
         pool = Pool(num_of_processes)
         data_split[i][col_out] = pool.map(func, data_split[i][col_in])

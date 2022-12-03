@@ -5,11 +5,11 @@ Created on Tue Nov 29 19:07:08 2022
 
 @author: Group 7
 """
-import os
 from utils import *
 import pandas as pd 
 import numpy as np
 import time
+import os
 
 def preprocess(df_in, num_split):    
     processed_df = df_in.copy()
@@ -52,13 +52,15 @@ if __name__ == '__main__':
     
     """
         Set variables here to define whether we want to read or write new pickles
+        These should be set to False unless you added new preprocessing steps 
+        which then we would need to generate new preprocessed and sentiment pickles
     """
     WRITE_NEW_PREPROCESSED_PICKLES = False
     WRITE_NEW_SENTIMENT_PICKLES = False
     NUM_OF_PROCESSES = 8
 
     if(WRITE_NEW_PREPROCESSED_PICKLES):
-        preprocessed_df = preprocess(reviews_df)
+        preprocessed_df = preprocess(reviews_df, NUM_OF_PROCESSES)
     preprocessed_df = merge_pickle_dfs('preprocessed_', NUM_OF_PROCESSES, out_path)
     
     if(WRITE_NEW_SENTIMENT_PICKLES):
