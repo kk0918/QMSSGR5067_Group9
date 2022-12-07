@@ -11,6 +11,21 @@ def read_csv(file_path):
     df = pd.read_table(file_path, sep=",")
     return df
 
+# add direct split pickles function
+def split_pickles(data, out_path, file_prefix, num_of_processes=8):
+    import numpy as np
+    import time
+    import os
+    data_split = np.array_split(data, num_of_processes)
+
+    for i in range(num_of_processes):
+        print(f'Writing to pickles on data_split {i}')
+        start = time.time()
+        write_pickle(data_split[i], out_path, f'{file_prefix}{i}')
+        end = time.time()
+        print("-------------------------------------------")
+        print("PPID %s Completed in %s" % (os.getpid(), round(end-start, 2)))
+    return
 
 """
    Write out sentiment pickles, defined by num_of_processes which I default set to 8
@@ -302,6 +317,17 @@ def pca_fun(df_in, exp_var_in, path_o, name_in):
     import pandas as pd
     dim_red = PCA(n_components=exp_var_in)
     red_data = pd.DataFrame(dim_red.fit_transform(df_in))
+    exp_var = sum(dim_red.explained_variance_ratio_)
+    print ("Explained variance:", exp_var)
+    write_pickle(dim_red, path_o, name_in)
+    return red_data
+
+def sparse_pca_fun(df_in, target_component, path_o, name_in):
+    #pca for large sparse dataset
+    from sklearn.decomposition import TruncatedSVD
+    import pandas as pd
+    dim_red = TruncatedSVD(n_components=target_component, random_state=42)
+    red_data = dim_red.fit_transform(df_in)
     exp_var = sum(dim_red.explained_variance_ratio_)
     print ("Explained variance:", exp_var)
     write_pickle(dim_red, path_o, name_in)
