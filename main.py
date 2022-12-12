@@ -72,15 +72,15 @@ if __name__ == '__main__':
     sentiment_df = merge_pickle_dfs('sentiment_', NUM_OF_PROCESSES, out_path)
     
     if(WRITE_NEW_MERGED_BOX_OFFICE_PICKLES):
-        preprocess_box_office_df = preprocess_headers_and_movie_df(domestic_box_office, out_path, 'movie', 'box_office')
-    preprocess_box_office_df = read_pickle(out_path, 'box_office')
+        preprocessed_box_office_df = preprocess_box_office_df(domestic_box_office, out_path, 'box_office')
+    preprocessed_box_office_df = read_pickle(out_path, 'box_office')
     
     if(WRITE_NEW_RT_SCORES_PICKLES):
-        rt_scores_df = preprocess_headers_and_movie_df(rt_scores, out_path, 'movie_title', 'rt_scores')
+        rt_scores_df = preprocess_rt_scores_df(rt_scores, out_path, 'rt_scores')
     rt_scores_df = read_pickle(out_path, 'rt_scores')
     rt_scores_df = rt_scores_df[['movie', 'tomatometer_status', 'tomatometer_rating', 'tomatometer_count', 'audience_rating', 'audience_count']]
     
-    merged_box_office_and_original_df = sentiment_df.merge(preprocess_box_office_df, how='inner', on='movie')
+    merged_box_office_and_original_df = sentiment_df.merge(preprocessed_box_office_df, how='inner', on='movie')
 
     # this DF contains sentiment, box office data, and RT scores
     final_rt_df = merged_box_office_and_original_df.merge(rt_scores_df, how='inner', on='movie')

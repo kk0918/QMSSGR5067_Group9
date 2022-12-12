@@ -67,13 +67,26 @@ def merge_pickle_dfs(file_prefix, num_of_sentiment_dfs, file_path):
 """
     ***************** Preprocessing Helpers *****************
 """
-# Box office DF
-def preprocess_headers_and_movie_df(df_in, out_path, col_in, name_in):
+# RT score DF
+def preprocess_rt_scores_df(df_in, out_path, name_in):
     processed_df = df_in.copy()
     # lowercase headers
     processed_df.columns = [header.lower() for header in processed_df.columns]
-    processed_df["movie"] = processed_df[col_in].str.lower()
+    processed_df['movie'] = processed_df['movie_title'].str.lower()
+
+    write_pickle(processed_df, out_path, name_in)
+    return processed_df
+
+# Box office DF
+def preprocess_box_office_df(df_in, out_path, name_in):
+    processed_df = df_in.copy()
+    # lowercase headers
+    processed_df.columns = [header.lower() for header in processed_df.columns]
+    processed_df['movie'] = processed_df['movie'].str.lower()
     
+    # Remove dollar signs and change to int type for domestic gross
+    processed_df['domestic gross'] = processed_df['domestic gross'].str.replace(',', '').str.replace('$', '').astype(int)
+
     write_pickle(processed_df, out_path, name_in)
     return processed_df
 
