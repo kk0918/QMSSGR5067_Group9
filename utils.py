@@ -67,8 +67,18 @@ def merge_pickle_dfs(file_prefix, num_of_sentiment_dfs, file_path):
 """
     ***************** Preprocessing Helpers *****************
 """
+# Box office DF
+def preprocess_headers_and_movie_df(df_in, out_path, col_in, name_in):
+    processed_df = df_in.copy()
+    # lowercase headers
+    processed_df.columns = [header.lower() for header in processed_df.columns]
+    processed_df["movie"] = processed_df[col_in].str.lower()
+    
+    write_pickle(processed_df, out_path, name_in)
+    return processed_df
 
-def preprocess(df_in, out_path, num_split):    
+# Sentiment df
+def preprocess_sentiment_df(df_in, out_path, num_split):    
     import numpy as np
 
     processed_df = df_in.copy()
@@ -83,6 +93,8 @@ def preprocess(df_in, out_path, num_split):
     processed_df["cleaned_review"] = processed_df.cleaned_review.apply(clean_text)
     # Remove stopwords
     processed_df["cleaned_review"] = processed_df.cleaned_review.apply(rem_sw)
+    # Lowercase title
+    processed_df["movie"] = processed_df.movie.str.lower()
     
     # Drop columns not needed for analysis
     processed_df = processed_df.drop('date', axis=1)
