@@ -11,9 +11,30 @@ import numpy as np
 import time
 import os
 
-def intersection(lst1, lst2):
-    lst3 = [value for value in lst1 if value in lst2]
-    return lst3
+"""
+    DF Key:
+        preprocessed_df:
+            dataframe consisting of original rotten_tomatoes 
+            dataset with critics reviews and critic score. Preprocessed so the
+            reviews have words between quotes removed, titles from review removed, 
+            text cleaned, stopwords removed, and title lowercased. 
+        sentiment_df:
+            exact same as preprocessed_df except with a vader_sentiment
+            column attached. Only reason this is separate was because calculating
+            sentiment was extremely slow and didn't want it to be super slow 
+            if we needed to change other unrelated columns.
+        preprocess_box_office_df:
+            dataframe from box office file. intermediate 
+            df necessary to merge with sentiment_df. preprocessed to just 
+            lowercase column names and lowercase movie title.
+        rt_scores_df:
+            dataframe from rotten tomatoes scores file. intermediate df 
+            necessary to merge to create final df. preprocessed to just lowercase
+            column names and lowercase movie title.
+        final_rt_df:
+            Final dataframe consisting of sentiment_df merged with preprocess_box_office_df
+            and rt_scores_df.
+"""
 
 if __name__ == '__main__':
     rotten_tomatoes_dataset_path = os.getcwd() + '/raw_datasets/rottentomatoes-400k.csv'
@@ -62,5 +83,5 @@ if __name__ == '__main__':
     merged_box_office_and_original_df = sentiment_df.merge(preprocess_box_office_df, how='inner', on='movie')
 
     # this DF contains sentiment, box office data, and RT scores
-    final_df = merged_box_office_and_original_df.merge(rt_scores_df, how='inner', on='movie')
-    print("Unique movies: ",len( final_df.movie.unique() ))
+    final_rt_df = merged_box_office_and_original_df.merge(rt_scores_df, how='inner', on='movie')
+    print("Unique movies: ",len( final_rt_df.movie.unique() ))
