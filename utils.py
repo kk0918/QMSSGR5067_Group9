@@ -69,11 +69,13 @@ def merge_pickle_dfs(file_prefix, num_of_sentiment_dfs, file_path):
 """
 # RT score DF
 def preprocess_rt_scores_df(df_in, out_path, name_in):
+    import pandas as pd
     processed_df = df_in.copy()
     # lowercase headers
     processed_df.columns = [header.lower() for header in processed_df.columns]
     processed_df['movie'] = processed_df['movie_title'].str.lower()
-
+    # Only get year of review
+    processed_df['release_year'] = pd.DatetimeIndex(processed_df['original_release_date']).year
     write_pickle(processed_df, out_path, name_in)
     return processed_df
 
@@ -94,7 +96,7 @@ def preprocess_box_office_df(df_in, out_path, name_in):
 def preprocess_sentiment_df(df_in, out_path, num_split):    
     import numpy as np
     import pandas as pd
-    print("TEST")
+
     processed_df = df_in.copy()
     # lowercase headers
     processed_df.columns = [header.lower() for header in processed_df.columns]
@@ -111,7 +113,6 @@ def preprocess_sentiment_df(df_in, out_path, num_split):
     processed_df["movie"] = processed_df.movie.str.lower()
     
     # Only get year of review
-    #processed_df["date_year"] = processed_df["date"][-4:]
     processed_df['date_year'] = pd.DatetimeIndex(processed_df['date']).year
     # Drop columns not needed for analysis
     processed_df = processed_df.drop('publish', axis=1)

@@ -78,11 +78,11 @@ if __name__ == '__main__':
     if(WRITE_NEW_RT_SCORES_PICKLES):
         rt_scores_df = preprocess_rt_scores_df(rt_scores, out_path, 'rt_scores')
     rt_scores_df = read_pickle(out_path, 'rt_scores')
-    rt_scores_df = rt_scores_df[['movie', 'tomatometer_status', 'tomatometer_rating', 'tomatometer_count', 'audience_rating', 'audience_count']]
+    rt_scores_df = rt_scores_df[['movie', 'release_year', 'tomatometer_status', 'tomatometer_rating', 'tomatometer_count', 'audience_rating', 'audience_count']]
     
     merged_box_office_and_original_df = sentiment_df.merge(preprocessed_box_office_df, how='inner', left_on=['movie','date_year'], right_on=['movie','release year'])
 
     # this DF contains sentiment, box office data, and RT scores
-    final_rt_df = merged_box_office_and_original_df.merge(rt_scores_df, how='inner', on='movie')
+    final_rt_df = merged_box_office_and_original_df.merge(rt_scores_df, how='inner', left_on=['movie','date_year'], right_on=['movie','release_year'])
     print("Unique movies: ",len( final_rt_df.movie.unique() ))
  
