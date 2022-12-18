@@ -69,11 +69,13 @@ def merge_pickle_dfs(file_prefix, num_of_sentiment_dfs, file_path):
 """
 # RT score DF
 def preprocess_rt_scores_df(df_in, out_path, name_in):
+    import pandas as pd
     processed_df = df_in.copy()
     # lowercase headers
     processed_df.columns = [header.lower() for header in processed_df.columns]
     processed_df['movie'] = processed_df['movie_title'].str.lower()
-
+    # Only get year of review
+    processed_df['release_year'] = pd.DatetimeIndex(processed_df['original_release_date']).year
     write_pickle(processed_df, out_path, name_in)
     return processed_df
 
@@ -93,6 +95,7 @@ def preprocess_box_office_df(df_in, out_path, name_in):
 # Sentiment df
 def preprocess_sentiment_df(df_in, out_path, num_split):    
     import numpy as np
+    import pandas as pd
 
     processed_df = df_in.copy()
     # lowercase headers
@@ -103,14 +106,15 @@ def preprocess_sentiment_df(df_in, out_path, num_split):
     # Remove title 
     processed_df["cleaned_review"] = processed_df.apply(lambda x: remove_title(x.cleaned_review, x.movie), axis=1)
     # Clean text
-    processed_df["cleaned_review"] = processed_df.cleaned_review.apply(clean_text)
+    processed_df["cleaned_review"] = processed_df.cleaned_review.apply(clean_text_without_lower)
     # Remove stopwords
     processed_df["cleaned_review"] = processed_df.cleaned_review.apply(rem_sw)
     # Lowercase title
     processed_df["movie"] = processed_df.movie.str.lower()
     
+    # Only get year of review
+    processed_df['date_year'] = pd.DatetimeIndex(processed_df['date']).year
     # Drop columns not needed for analysis
-    processed_df = processed_df.drop('date', axis=1)
     processed_df = processed_df.drop('publish', axis=1)
 
     # Split data into chunks
@@ -134,9 +138,8 @@ def preprocess_sentiment_df(df_in, out_path, num_split):
 """
 def remove_title(str_in, title):
     import re
-    str_in_lowercase = str_in.lower()
     title_lower = title.lower()
-    sent_clean = re.sub(r"\b{}\b".format(title_lower), "", str_in_lowercase)
+    sent_clean = re.sub(r"\b{}\b".format(title_lower), "", str_in, flags=re.IGNORECASE)
     return sent_clean
 
 """
@@ -157,6 +160,11 @@ def remove_words_between_quotes(str_in):
     sent_clean = re.sub('".*?"', "", sent_stripped_first_and_last_quotes)
     return sent_clean
 
+
+def clean_text_without_lower(str_in):
+    import re
+    sent_a_clean = re.sub("[^A-Za-z]+", " ", str_in) 
+    return sent_a_clean
 
 """
     ***************** Utils file from lecture *****************
