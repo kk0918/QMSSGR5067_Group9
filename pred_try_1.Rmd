@@ -1,0 +1,154 @@
+---
+title: "NLP_project"
+author: "sze pui"
+date: "12/13/2022"
+output: html_document
+---
+#load library
+```{r}
+library(tidyverse)
+```
+
+#thinking of some possible ways 
+#1; use cmd to connect to spyder and apply seperation to each word
+#2 then u can use the tfidf to compute the number of each word and put it in the random forest
+#import the data first and remove all the replicated word
+```{r setup, include=FALSE}
+#look at the cleaned review 
+
+library(ISLR)
+library(tidyverse)
+data(Hitters)
+Hitters <- na.omit(Hitters)
+
+final_rt = read.csv(file = '/Users/yangtianrun/Desktop/final_rt_df.csv') 
+#only remain the meaningful predictors in our mdoel
+#do we have to factorize the audience grading first? 
+reduced_rt = final_rt %>%  
+  select(movie, score, vader_sentiment, domestic.gross, tomatometer_rating, audience_rating)
+
+#I think we can calculate the mean of the score of each movie, and then we can remove the movie variable
+reduced_rt = reduced_rt %>% 
+  group_by(movie) %>% 
+  mutate(score = mean(score),vader_sentiment = mean(vader_sentiment),  domestic.gross = mean(domestic.gross), tomatometer_rating= mean(tomatometer_rating), 
+        audience_rating= mean( audience_rating)) %>%  distinct()
+
+reduced_rt  <- reduced_rt [,-1]
+reduced_rt = na.omit(reduced_rt)
+#data partition 
+
+set.seed(1)
+trainrows <- createDataPartition(reduced_rt$domestic.gross,
+                              p = .8,
+                             list = F)
+
+reduced_rt_train =  reduced_rt[trainrows,] 
+reduced_rt_test = reduced_rt[-trainrows,]
+```
+
+
+
+#Random Forest
+```{r}
+#Grid search using caret
+rf.grid = expand.grid(mtry = 1:4,
+                      splitrule = "variance",
+                      min.node.size = 1:6)
+
+#Define the CV
+ctrl <- trainControl(method = "cv")
+
+rf.fit = train(domestic.gross ~ . ,
+reduced_rt_train,
+method = "ranger",
+tuneGrid = rf.grid,
+trControl = ctrl)
+
+#Test error
+rf.pred<- predict(rf.fit, newdata = reduced_rt_test); rf.pred
+rf.rmse<- RMSE(rf.pred,  reduced_rt_test$domestic.gross);rf.rmse
+
+
+```
+
+```{r}
+#Some tuning part
+rf.fit$bestTune
+
+ggplot(rf.fit, highlight = TRUE)+ ggtitle("Grid search using caret for random forest")
+
+#The final model 
+#The variance importance is computed from permuting OOB data in this measure.
+set.seed(1)
+rf.final<- ranger(domestic.gross ~ . ,
+                        reduced_rt_train,
+                        mtry = rf.fit$bestTune[[1]],
+                        splitrule = "variance",
+                        min.node.size = rf.fit$bestTune[[3]],
+                        importance = "permutation",
+                        scale.permutation.importance = TRUE)
+
+ barplot(sort(ranger::importance(rf.final), decreasing = FALSE),
+        las = 2, horiz = TRUE, cex.names = 0.7,
+        col = colorRampPalette(colors = c("cyan","blue"))(19))
+```
+comments : The optimal tuning parameter is mtry = 1 and the minimum node size is equal to 6. The test error is 78520248.  Then, we can have a look on the variable importance.
+
+```{r}
+#Let's apply the regression tree and try to apply on some movies? 
+#and see what os the difference between them? 
+tesla = final_rt %>%  
+  select(movie, score, vader_sentiment, domestic.gross, tomatometer_rating, audience_rating) %>% 
+  group_by(movie) %>% 
+  mutate(score = mean(score),vader_sentiment = mean(vader_sentiment),  domestic.gross = mean(domestic.gross), tomatometer_rating= mean(tomatometer_rating), 
+        audience_rating= mean(audience_rating)) %>%  distinct() %>% filter(movie == "tesla")
+
+
+tesla_testing = tesla [,-1]
+rf.pred_tesla <- predict(rf.fit, newdata = tesla_testing); rf.pred_tesla
+
+#Let's try for another movie
+toy_story = final_rt %>%  
+  select(movie, score, vader_sentiment, domestic.gross, tomatometer_rating, audience_rating) %>% 
+  group_by(movie) %>% 
+  mutate(score = mean(score),vader_sentiment = mean(vader_sentiment),  domestic.gross = mean(domestic.gross), tomatometer_rating= mean(tomatometer_rating), 
+        audience_rating= mean(audience_rating)) %>%  distinct() %>% filter(movie == "toy story 4")
+
+toy_story_testing = toy_story[,-1]
+rf.pred_toy_story <- predict(rf.fit, newdata = toy_story_testing); rf.pred_toy_story 
+
+```
+
+
+
+
+Lets try to run the random forest again to see the model test error 
+```{r}
+second_reduced_rt = reduced_rt %>% select(-vader_sentiment)
+set.seed(1)
+second_trainrows <- createDataPartition(second_reduced_rt$domestic.gross,
+                              p = .8,
+                             list = F)
+
+second_reduced_rt_train =  second_reduced_rt[second_trainrows,] 
+second_reduced_rt_test = second_reduced_rt[-second_trainrows,]
+
+second_rf.grid = expand.grid(mtry = 1:3,
+                      splitrule = "variance",
+                      min.node.size = 1:6)
+
+second_rf.fit = train(domestic.gross ~ . ,
+second_reduced_rt_train,
+method = "ranger",
+tuneGrid = second_rf.grid,
+trControl = ctrl)
+
+#Test error
+second_rf.pred<- predict(second_rf.fit, newdata = second_reduced_rt_test); second_rf.pred
+second_rf.rmse<- RMSE(second_rf.pred,  second_reduced_rt_test$domestic.gross);second_rf.rmse
+second_rf.pred_tesla <- predict(second_rf.fit, newdata = tesla_testing);second_rf.pred_tesla
+
+
+```
+
+
